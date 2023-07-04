@@ -1,37 +1,24 @@
 #include <cstdlib>
 #include <iostream>
 #include <math.h>
+#include <vector>
 using namespace std;
 
-/* void matrix()
+std::vector<std::vector<float>> matrix_x() 
 {
-    int row;
-    int col;
-    int a[50][50];
-    cout << "enter num of rows = ";
-    cin >> row;
-    cout << "enter num of cols = ";
-    cin >> col;
-    cout << "\nEnter Matrix Elements: \n";
-    for (int i = 0; i < row; i++)
-    {
-        for (int j = 0; j < col; j++)
-        {
-            cout << "\nEnter [" << i << "][" << j << "]=  ";
-            cin >> a[i][j];
-        }
-    }
+    std::vector<std::vector<float>> x(3, std::vector<float>(3));
 
-    cout << "\nThe Matrix is:\n";
-    for (int i = 0; i < row; i++)
-    {
-        for (int j = 0; j < col; j++)
-        {
-            cout << a[i][j] << "  ";
+    std::cout << "Enter matrix values:" << "\n" << "\n";
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            std::cout << "Enter (" << i << ", " << j << ") th element: ";
+            std::cin >> x[i][j];
         }
-        cout << "\n";
     }
-} */
+    std::cout << "\n";
+    return x;
+}
+
 
 float norm(float a[3])
 {
@@ -43,29 +30,29 @@ float norm(float a[3])
     return sq;
 }
 
-float dot_pro(float b[3], float c[3])
-{
-    float pro[3];
-    float vecPro[3];
-    float ans;
-    float d = norm(c);
 
+float pro;
+double dot_pro(float A[3], float B[3]) {
     for (int i = 0; i < 3; i++)
     {
-        pro[i] = b[i] * c[i];
-        vecPro[i] = pro[i] / (d);
-        ans = vecPro[i];
-        return ans;
+        pro += A[i] * B[i];
     }
+    return pro;
 }
-int i;
+
+
+float proo;
+float dot_proo(float A[3], float B[3]) {
+    proo = (A[0] * B[0]) + (A[1] * B[1]) + (A[2] * B[2]);
+    return proo;
+}
+
 
 void gramSchmidt(float a[3][3])
 {
     float u1[3], u2[3], u3[3];
     float v1[3], v2[3], v3[3];
     float w2[3], w3[3];
-    float d1[3], d2[3];
     float n2, n3;
 
     for (int j = 0; j < 3; j++)
@@ -91,10 +78,10 @@ void gramSchmidt(float a[3][3])
         v1[i] = u1[i] / norm(u1);
     }
 
+    float r1 = dot_pro(u2, v1);
     for (int i = 0; i < 3; i++)
     {
-        v2[i] = (u2[i] - ((dot_pro(u2, v1)) * v1[i]));
-        cout << " v2 " << v2[i] << "\n";
+        v2[i] = u2[i] - r1 * v1[i];
     }
     n2 = norm(v2);
     for (int i = 0; i < 3; i++)
@@ -102,48 +89,87 @@ void gramSchmidt(float a[3][3])
         w2[i] = v2[i] / n2;
     }
 
-
- /*   for (int i = 0; i < 3; i++)
-    {
-        v3[i] = u3[i] - (((dot_pro(u3, v1)) * v1[i]) - ((dot_pro(u3, v2)) * w2[i]));
-        cout << " v3 " << v3[i];
-    }  */
-  
+    double r2 = dot_proo(u3, v1);
+    double r3 = dot_proo(u3, w2);
     for (int i = 0; i < 3; i++)
     {
-        v3[i] = dot_pro(u3, v2);
-        cout << " v3 " << v3[i];
+        v3[i] = u3[i] - (r2 * v1[i]) - (r3 * w2[i]);
     }
-
-
-  /*  n3 = norm(v3);
+    n3 = norm(v3);
     for (int i = 0; i < 3; i++)
     {
         w3[i] = v3[i] / n3;
-        cout << " w3 " << w3[i];
-    }  */
-  
+    }  
 
+    std::cout << "\n" << "\n" << "Q matrix is: " << "\n" << "\n";
+    float matrixQ[3][3];
+    for (int i = 0; i < 3; i++)
+    {
+        matrixQ[i][0] = v1[i];
+        matrixQ[i][1] = w2[i];
+        matrixQ[i][2] = w3[i];
+    }
+    for (int i = 0; i < 3; ++i)
+    {
+        for (int j = 0; j < 3; ++j)
+        {
+            std::cout << matrixQ[i][j] << " ";
+        }
+        std::cout << endl;
+    }
 
+    std::cout << "\n" << "\n" "R matrix is: " << "\n" << "\n";
+    float matrixR[3][3] = { norm(u1),r1,r2,
+                           0,n2,r3,
+                           0,0,n3};
+    for (int i = 0; i < 3; ++i)
+    {
+        for (int j = 0; j <3; ++j)
+        {
+            std::cout << matrixR[i][j] << " ";
+        }
+        std::cout << endl;
+    }
+
+    float matrixA[3][3] = { 0,0,0, 0,0,0, 0,0,0 };
+    for (int i = 0; i < 3; ++i)
+    {
+        for (int j = 0; j < 3; ++j)
+        {
+            float sum1 = 0;
+            for (int k = 0; k < 3; ++k)
+            {
+                sum1 = matrixQ[i][k] * matrixR[k][j];
+                matrixA[i][j] = matrixA[i][j] + sum1;
+            }
+        }
+    }
+    
+    std::cout << "\n" << "\n" "Q x R = A matrix is: " << "\n" << "\n";
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            std::cout << matrixA[i][j] << " ";
+        }
+        std::cout << endl;
+    } 
 }
 
 int main()
 {   
-    float a[3][3] = {1,2,0 
-                    ,2,12,2 
-                    ,0,0,0};
-    float u3[3] = { 0,2,1 };
-    float v2[3] = { 1.6,-0.8,0 };
-    float v3[3];
-    float g;
-    g = norm(v2);
-    cout << " v2 " << g;
-    for (int i = 0; i < 3; i++)
-    {
-        v3[i] = u3[i]*(v2[i]/g);
-        cout << " v3 " << v3[i];
+    float a[3][3];
+    std::vector<std::vector<float>> x = matrix_x();
+    std::cout << "The matrix";
+    std::cout << "\n" << "\n";
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            a[i][j] = x[i][j];
+            std::cout << x[i][j] << " ";
+        }
+        std::cout << "\n";
     }
-
+    gramSchmidt(a);
 }
 
 
